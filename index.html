@@ -3,169 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seletor de Data — Mínimo 2 dias úteis</title>
+<title>Data desejada</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: Arial, Helvetica, sans-serif;
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: transparent;
-    color: #000;
-    padding: 8px 0;
-  }
-
-  .date-field {
-    max-width: 400px;
+    color: #1F1F1F;
+    line-height: 1.4;
+    overflow: hidden;
   }
 
   .date-field label {
     display: block;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 6px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #1F1F1F;
+    margin-bottom: 2px;
+  }
+
+  .date-field label .required {
+    color: #AFAFAF;
+    font-weight: 400;
+    margin-left: 3px;
+    font-size: 15px;
   }
 
   .date-field .hint {
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 10px;
-    line-height: 1.4;
+    font-size: 14px;
+    color: #6B6B6B;
+    margin-bottom: 8px;
   }
 
-  .date-input-wrapper {
-    position: relative;
-  }
-
-  .date-input-wrapper input[type="date"] {
+  .date-field input[type="date"] {
     width: 100%;
+    max-width: 320px;
     padding: 10px 14px;
-    font-size: 18px;
-    font-family: Arial, Helvetica, sans-serif;
-    border: 1.5px solid #d0d0d0;
-    border-radius: 6px;
-    background: #fff;
-    color: #1a1a1a;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    font-size: 15px;
+    font-family: inherit;
+    border: 1px solid #E0E0E0;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #1F1F1F;
+    transition: border-color 0.2s;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
   }
 
-  .date-input-wrapper input[type="date"]:focus {
-    border-color: #E9030F;
-    box-shadow: 0 0 0 2.5px rgba(233, 3, 15, 0.15);
-  }
-
-  .date-input-wrapper input[type="date"]:invalid,
-  .date-input-wrapper input[type="date"].invalid {
-    border-color: #E9030F;
-  }
+  .date-field input[type="date"]:hover { border-color: #C0C0C0; }
+  .date-field input[type="date"]:focus { border-color: #1F1F1F; }
+  .date-field input[type="date"].invalid { border-color: #E9030F; }
 
   .validation-msg {
-    margin-top: 6px;
-    font-size: 12.5px;
-    line-height: 1.4;
+    margin-top: 4px;
+    font-size: 13px;
     min-height: 18px;
-    transition: opacity 0.2s;
   }
 
-  .validation-msg.error {
-    color: #E9030F;
-  }
-
-  .validation-msg.success {
-    color: #16a34a;
-  }
-
-  /* Hidden field that stores the selected date for Tally */
-  .tally-hidden-value {
-    display: none;
-  }
+  .validation-msg.error { color: #E9030F; }
+  .validation-msg.success { color: #1a8a3f; }
 </style>
 </head>
 <body>
-
 <div class="date-field">
-  <label for="datePicker">Data desejada</label>
-  <div class="hint" id="hintText">Selecione uma data a partir de <strong id="minDateDisplay"></strong></div>
-  <div class="date-input-wrapper">
-    <input type="date" id="datePicker" />
-  </div>
-  <div class="validation-msg" id="validationMsg"></div>
+  <label for="dp">Data desejada <span class="required">*</span></label>
+  <div class="hint">Selecione a partir de <strong id="md"></strong></div>
+  <input type="date" id="dp" required />
+  <div class="validation-msg" id="vm"></div>
 </div>
-
-<!-- 
-  COMO USAR NO TALLY:
-  
-  Opção A — Embed block dentro do Tally:
-  No Tally, digite /embed e cole a URL onde este HTML está hospedado
-  (pode ser GitHub Pages, Netlify, ou qualquer hosting estático).
-  
-  Opção B — Code Injection (Tally Pro + Custom Domain):
-  Cole o <script> abaixo no code injection do formulário.
-  Ele vai interceptar o campo de data nativo do Tally e aplicar a restrição.
-  
-  Opção C — Embed do Tally no seu site:
-  Se o formulário Tally está embeddado no SEU site, cole este script
-  no seu site junto com o iframe do Tally.
--->
-
 <script>
-(function() {
-  // === CONFIGURAÇÃO ===
-  const DIAS_MINIMOS = 2; // Mínimo de dias à frente (altere aqui se quiser)
-  
-  // === CÁLCULO DA DATA MÍNIMA ===
-  function calcMinDate() {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const minima = new Date(hoje);
-    minima.setDate(minima.getDate() + DIAS_MINIMOS);
-    return minima;
-  }
-
-  function formatISO(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${dd}`;
-  }
-
-  function formatBR(d) {
-    const dd = String(d.getDate()).padStart(2, '0');
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const y = d.getFullYear();
-    return `${dd}/${m}/${y}`;
-  }
-
-  // === SETUP ===
-  const minDate = calcMinDate();
-  const picker = document.getElementById('datePicker');
-  const msg = document.getElementById('validationMsg');
-  const minDisplay = document.getElementById('minDateDisplay');
-
-  // Define o min no input e exibe a data mínima
-  picker.setAttribute('min', formatISO(minDate));
-  picker.value = ''; 
-  minDisplay.textContent = formatBR(minDate);
-
-  // === VALIDAÇÃO ===
-  picker.addEventListener('change', function() {
-    const selected = new Date(this.value + 'T00:00:00');
-    
-    if (selected < minDate) {
-      this.classList.add('invalid');
-      msg.className = 'validation-msg error';
-      msg.innerHTML = `⚠️ Data inválida. Selecione a partir de <strong>${formatBR(minDate)}</strong> (mínimo ${DIAS_MINIMOS} dias a partir de hoje).`;
-      this.value = ''; // Limpa a seleção inválida
-    } else {
-      this.classList.remove('invalid');
-      msg.className = 'validation-msg success';
-      msg.innerHTML = `✓ Data selecionada: <strong>${formatBR(selected)}</strong>`;
-    }
+(function(){
+  var D=2,h=new Date();h.setHours(0,0,0,0);h.setDate(h.getDate()+D);
+  var p=document.getElementById('dp'),m=document.getElementById('vm'),
+      iso=h.toISOString().slice(0,10),
+      br=iso.slice(8)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4);
+  document.getElementById('md').textContent=br;
+  p.setAttribute('min',iso);
+  p.addEventListener('change',function(){
+    var s=new Date(this.value+'T00:00:00');
+    if(s<h){this.classList.add('invalid');m.className='validation-msg error';
+      m.innerHTML='Selecione a partir de <strong>'+br+'</strong>';this.value='';}
+    else{this.classList.remove('invalid');m.className='validation-msg success';
+      var d=this.value.slice(8)+'/'+this.value.slice(5,7)+'/'+this.value.slice(0,4);
+      m.innerHTML='✓ '+d;}
   });
 })();
 </script>
-
 </body>
 </html>
